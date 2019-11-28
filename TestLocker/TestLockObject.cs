@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace TestLocker
 {
 	[Parallelizable(ParallelScope.Fixtures)]
-	class TestLockDetail
+	class TestLockObject
 	{
 		[Test]
 		public void CreationSuccessful () {

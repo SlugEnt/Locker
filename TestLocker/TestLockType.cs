@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace TestLocker
 {
 	[Parallelizable(ParallelScope.Fixtures)]
-	class TestLockSetting
+	class TestLockType
 	{
 		[Test]
 		public void EnumAndStringArrayValuesMatch () {

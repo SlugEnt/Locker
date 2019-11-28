@@ -35,10 +35,10 @@ namespace Locker
 		/// <summary>
 		/// Builds a LockObject object..  Used internally when building the object as the result of a call to the Redis DB.
 		/// </summary>
-		/// <param name="prefix"></param>
-		/// <param name="lockCategory"></param>
-		/// <param name="lockID"></param>
-		/// <param name="typeAsString"></param>
+		/// <param name="prefix">The Lock Engine prefix value</param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="typeAsString">The Redis String value of the Lock Type</param>
 		internal LockObject (string prefix, string lockCategory, string lockID, string typeAsString)
 		{
 			Prefix = prefix;

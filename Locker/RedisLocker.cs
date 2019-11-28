@@ -9,6 +9,9 @@ using Locker;
 
 namespace SlugEnt.Locker
 {
+	/// <summary>
+	/// Provides a Locker backed by a Redis Database to be used for locking objects across a distributed system in a quick and easy manner.
+	/// </summary>
 	public class RedisLocker : ILocker
 	{
 		private RedisCacheClient _redisCacheClient;
@@ -43,8 +46,8 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// Determines if a lock exists for the given lockCategory and LockID
 		/// </summary>
-		/// <param name="lockCategory"></param>
-		/// <param name="lockId"></param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
 		/// <returns></returns>
 		public async Task<bool> Exists(string lockCategory, string lockId) { return await _redisDB.ExistsAsync(BuildLockKey(lockCategory, lockId)); }
 
@@ -52,8 +55,8 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// Returns if a lock is set and if so, the type of lock that is set.  If your application only has one type of lock then calling Exists is much faster and recommended.
 		/// </summary>
-		/// <param name="lockCategory"></param>
-		/// <param name="lockId"></param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
 		/// <returns></returns>
 		public async Task<LockObject> GetLock (string lockCategory, string lockId) {
 			string value = await _redisDB.GetAsync<string>(BuildLockKey(lockCategory, lockId));
@@ -67,8 +70,8 @@ namespace SlugEnt.Locker
 		/// Sets a lock for the given lockCategory with the Identifier provided.  If you know the specific type of lock you want to set, it is better to
 		/// call the SetLockType methods.  They result in less GC and system overhead and are faster.
 		/// </summary>
-		/// <param name="lockCategory">The category this lock applies to.  Categories are ways of grouping related locks together.</param>
-		/// <param name="lockID">The ID of the object that you wish to mark locked.</param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
 		/// <param name="lockDurationSeconds">The number of seconds to maintain the lock, before automatically being freed.</param>
 		/// <param name="lockType">The Type of lock you want.</param>
 		/// <returns></returns>
@@ -81,8 +84,8 @@ namespace SlugEnt.Locker
 		/// Sets an Exclusive lock for the given lockCategory with the Identifier provided.  An Exclusive lock means only 1 entity can access the object while
 		/// the lock is set.
 		/// </summary>
-		/// <param name="lockCategory">The category this lock applies to.  Categories are ways of grouping related locks together.</param>
-		/// <param name="lockID">The ID of the object that you wish to mark locked.</param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
 		/// <param name="lockDurationSeconds">The number of seconds to maintain the lock, before automatically being freed.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLockExclusive (string lockCategory, string lockID, int lockDurationSeconds = 300) {
@@ -94,8 +97,8 @@ namespace SlugEnt.Locker
 		/// Sets a ReadOnly lock for the given lockCategory with the Identifier provided.  ReadOnly, means that the entity that initiated the lock is the only
 		/// one who can update it, but all others are able to read.
 		/// </summary>
-		/// <param name="lockCategory">The category this lock applies to.  Categories are ways of grouping related locks together.</param>
-		/// <param name="lockID">The ID of the object that you wish to mark locked.</param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
 		/// <param name="lockDurationSeconds">The number of seconds to maintain the lock, before automatically being freed.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLockReadOnly(string lockCategory, string lockID, int lockDurationSeconds = 300)
@@ -107,8 +110,8 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// Sets an AppLevel1 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
 		/// </summary>
-		/// <param name="lockCategory">The category this lock applies to.  Categories are ways of grouping related locks together.</param>
-		/// <param name="lockID">The ID of the object that you wish to mark locked.</param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
 		/// <param name="lockDurationSeconds">The number of seconds to maintain the lock, before automatically being freed.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel1(string lockCategory, string lockID, int lockDurationSeconds = 300)
@@ -120,8 +123,8 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// Sets an AppLevel2 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
 		/// </summary>
-		/// <param name="lockCategory">The category this lock applies to.  Categories are ways of grouping related locks together.</param>
-		/// <param name="lockID">The ID of the object that you wish to mark locked.</param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
 		/// <param name="lockDurationSeconds">The number of seconds to maintain the lock, before automatically being freed.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel2(string lockCategory, string lockID, int lockDurationSeconds = 300)
@@ -133,8 +136,8 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// Sets an AppLevel3 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
 		/// </summary>
-		/// <param name="lockCategory">The category this lock applies to.  Categories are ways of grouping related locks together.</param>
-		/// <param name="lockID">The ID of the object that you wish to mark locked.</param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
 		/// <param name="lockDurationSeconds">The number of seconds to maintain the lock, before automatically being freed.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel3(string lockCategory, string lockID, int lockDurationSeconds = 300)
@@ -146,8 +149,8 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// Deletes the specified lock
 		/// </summary>
-		/// <param name="lockCategory">The lockCategory of the lock to be deleted.</param>
-		/// <param name="lockID">The ID value of the lock to be deleted.</param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
 		/// <returns></returns>
 		public async Task<bool> DeleteLock(string lockCategory, string lockID) { return await _redisDB.RemoveAsync(BuildLockKey(lockCategory, lockID)); }
 
@@ -157,7 +160,7 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// Returns the number of Locks there are for the given lockCategory
 		/// </summary>
-		/// <param name="lockCategory"></param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <returns></returns>
 		public async Task<int> LockCount(string lockCategory)
 		{
@@ -170,22 +173,30 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// Removes all locks for the specified lockCategory
 		/// </summary>
-		/// <param name="lockCategory"></param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <returns></returns>
-		public async Task DeleteAllLocksForlockCategory(string lockCategory)
-		{
-			IEnumerable<string> keys = await _redisDB.SearchKeysAsync(BuildLockPrefix(lockCategory) + "*");
-
-			await _redisDB.RemoveAllAsync(keys);
+		public async Task DeleteAllLocksForlockCategory(string lockCategory) {
+				IEnumerable<string> keys = await _redisDB.SearchKeysAsync(BuildLockPrefix(lockCategory) + "*");
+				await _redisDB.RemoveAllAsync(keys);
+		
 		}
 
 
+		/// <summary>
+		/// Flushes all locks in the database
+		/// </summary>
+		/// <returns></returns>
 		public async Task<bool> FlushAllLocks()
 		{
-			IEnumerable<string> keys = await _redisDB.SearchKeysAsync(_lockPrefix + "*");
-			await _redisDB.RemoveAllAsync(keys);
+			//TODO If this is only a lock database, then we can just do a flush.
+			if (_isDedicatedLockDatabase) await _redisDB.FlushDbAsync();
+			else
+			{
+				// Need to do a key search - getting all the keys that start with our lock prefix
+				IEnumerable<string> keys = await _redisDB.SearchKeysAsync(_lockPrefix + "*");
+				await _redisDB.RemoveAllAsync(keys);
+			}
 			return true;
-
 		}
 
 
@@ -193,9 +204,9 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// Updates the lock expiration time to the new value.  It does not add the new time to existing, but sets it to expire in the given seconds.
 		/// </summary>
-		/// <param name="lockCategory"></param>
-		/// <param name="lockID"></param>
-		/// <param name="lockDurationInSeconds"></param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="lockDurationInSeconds">Number of seconds to set the lock duration for.</param>
 		/// <returns></returns>
 		public async Task<bool> UpdateLockExpirationTime(string lockCategory, string lockID, int lockDurationInSeconds)
 		{
@@ -204,6 +215,12 @@ namespace SlugEnt.Locker
 		}
 
 
+		/// <summary>
+		/// Retrieves a LockObject that provides information about the lock, including what type of lock it is.
+		/// </summary>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
+		/// <returns></returns>
 		public async Task<LockObject> LockInfo (string lockCategory, string lockId) {
 			LockObject lockobj = await GetLock(lockCategory, lockId);
 			return lockobj;
@@ -213,13 +230,18 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// Builds the Lock Key
 		/// </summary>
-		/// <param name="lockCategory">The type of lock</param>
-		/// <param name="id">The ID value for the lock</param>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="id">The ID value of the lock object</param>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal string BuildLockKey(string lockCategory, string id) { return (BuildLockPrefix(lockCategory) + id); }
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal string BuildLockPrefix(string lockCategory) { return _lockPrefix + lockCategory + ":"; }
 	}
