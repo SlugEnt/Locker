@@ -2,18 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyVersion>1.0.6.6</AssemblyVersion>
+    <AssemblyVersion>1.0.1.1</AssemblyVersion>
     <Authors>Scott Herrmann</Authors>
     <Company>Slug Enterprises</Company>
     <Description>General Purpose Distributed Lock Manager utilizing Redis as back end</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Version>1.0.1-beta-03</Version>
+    <Version>1.0.1-beta-09</Version>
+    <PackageId>SlugEnt.Locker</PackageId>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/SlugEnt/Locker</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/SlugEnt/Locker</PackageProjectUrl>
+    <RepositoryType>GIT</RepositoryType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
     <ShouldCreateLogs>True</ShouldCreateLogs>
-    <AdvancedSettingsExpanded>False</AdvancedSettingsExpanded>
+    <AdvancedSettingsExpanded>True</AdvancedSettingsExpanded>
     <UpdateAssemblyVersion>False</UpdateAssemblyVersion>
     <UpdateAssemblyFileVersion>False</UpdateAssemblyFileVersion>
     <UpdateAssemblyInfoVersion>False</UpdateAssemblyInfoVersion>
@@ -37,6 +42,13 @@
 
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="5.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

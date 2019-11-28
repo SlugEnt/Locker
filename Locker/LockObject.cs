@@ -7,7 +7,7 @@ using System.Threading.Channels;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("TestLocker")]
-
+ 
 namespace Locker
 {
 	/// <summary>
