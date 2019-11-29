@@ -5,13 +5,14 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyVersion>1.0.8.10</AssemblyVersion>
+    <AssemblyVersion>1.0.8.23</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="nunit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="SlugEnt.UniqueKeys" Version="1.0.4" />
     <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="5.5.0" />
   </ItemGroup>
 
