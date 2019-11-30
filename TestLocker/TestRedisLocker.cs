@@ -202,6 +202,7 @@ namespace SlugEnt.TestRedisLocker
 			string testID_5 = _idGenerator.Next(3000, 3999).ToString();
 			string testID_6 = _idGenerator.Next(6000, 6999).ToString();
 			TimeSpan t6 = new TimeSpan(0,0,0,2);
+			TimeSpan t7 = new TimeSpan(0,2,0,0);
 
 			// Now set lock using Specific Method
 			switch ( lockType ) {
@@ -469,6 +470,18 @@ namespace SlugEnt.TestRedisLocker
 		}
 
 
+		// Validate that GetLock returns null if lock was not found
+		[Test]
+		public async Task GetLock_MissingLock_ReturnsNull () {
+			string id = _idGenerator.Next(34000, 49999).ToString();
+			string lockCategory = _uniqueKeys.GetKey("GBLI");
+
+			LockObject missing = await _locker.GetLock(lockCategory, id);
+			Assert.IsNull(missing);
+		}
+
+
+
 		// Validate that the TTL value on the Locker is used for the default lock duration
 		[Test]
 		public async Task LockTTLSetCorrectly () {
@@ -489,10 +502,21 @@ namespace SlugEnt.TestRedisLocker
 		}
 
 
+		// Validates that deleting a non existant lock returns false
+		[Test]
+		public async Task DeleteNonExistantLock () {
+			string id = _idGenerator.Next(34000, 49999).ToString();
+			string lockCategory = _uniqueKeys.GetKey("DNEL");
+
+			bool result = await _locker.DeleteLock(lockCategory, id);
+			Assert.IsFalse(result);
+		}
+
+
 		// Generates a random number of locks and sets them in Redis
 		internal async Task<int> GenerateRandomLocks(string lockCategory, int min, int max)
 		{
-			int maxLocks = new Random().Next(min, max);
+						int maxLocks = new Random().Next(min, max);
 			int startingId = _idGenerator.Next(18000, 18899);
 			int j = 0;
 			for ( int i = 0; i < maxLocks; i++, j++) {

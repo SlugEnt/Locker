@@ -1,7 +1,7 @@
 ﻿using Locker;
 using NUnit.Framework;
 
-namespace TestLocker
+namespace SlugEnt.TestRedisModels
 {
 	[Parallelizable(ParallelScope.Fixtures)]
 	class TestLockType

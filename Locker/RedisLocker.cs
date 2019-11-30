@@ -53,13 +53,14 @@ namespace SlugEnt.Locker
 
 
 		/// <summary>
-		/// Returns if a lock is set and if so, the type of lock that is set.  If your application only has one type of lock then calling Exists is much faster and recommended.
+		/// Returns a LockObject if a lock is set and if so, the type of lock that is set.  If your application only has one type of lock then calling Exists is much faster and recommended.
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
 		/// <returns></returns>
 		public async Task<LockObject> GetLock (string lockCategory, string lockId) {
 			string value = await _redisDB.GetAsync<string>(BuildLockKey(lockCategory, lockId));
+			if ( value == null ) { return null;}
 
 			string lockTypeAsString = value[0].ToString();
 			string comment;
@@ -197,7 +198,7 @@ namespace SlugEnt.Locker
 
 
 		/// <summary>
-		/// Deletes the specified lock
+		/// Deletes the specified lock.  Returns False if the lock did not exist
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
