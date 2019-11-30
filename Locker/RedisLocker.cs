@@ -74,13 +74,17 @@ namespace SlugEnt.Locker
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
-		/// <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
+		/// <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
 		/// <param name="lockType">The Type of lock you want.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLock(string lockCategory, string lockID,  LockType lockType = LockType.Exclusive, int lockDuration = 0) {
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.ValuesAsStrings[(int)lockType], new TimeSpan(0, 0, 0,0,ttl));
 			}
+		public async Task<bool> SetLock(string lockCategory, string lockID, TimeSpan lockDuration, LockType lockType = LockType.Exclusive)
+		{
+			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.ValuesAsStrings[(int)lockType], lockDuration);
+		}
 
 
 		/// <summary>
@@ -95,6 +99,10 @@ namespace SlugEnt.Locker
 		{
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.EXCLUSIVE, new TimeSpan(0, 0, 0,0,ttl));
+		}
+		public async Task<bool> SetLockExclusive(string lockCategory, string lockID, TimeSpan lockDuration)
+		{
+			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.EXCLUSIVE, lockDuration);
 		}
 
 
@@ -111,6 +119,10 @@ namespace SlugEnt.Locker
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.READONLY, new TimeSpan(0, 0, 0,0,ttl));
 		}
+		public async Task<bool> SetLockReadOnly(string lockCategory, string lockID, TimeSpan lockDuration)
+		{
+			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.READONLY, lockDuration);
+		}
 
 
 		/// <summary>
@@ -124,6 +136,10 @@ namespace SlugEnt.Locker
 		{
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.APPLEVEL1, new TimeSpan(0, 0, 0,0,ttl));
+		}
+		public async Task<bool> SetLockAppLevel1(string lockCategory, string lockID, TimeSpan lockDuration)
+		{
+			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.APPLEVEL1, lockDuration);
 		}
 
 
@@ -139,6 +155,10 @@ namespace SlugEnt.Locker
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.APPLEVEL2, new TimeSpan(0, 0, 0,0,ttl));
 		}
+		public async Task<bool> SetLockAppLevel2(string lockCategory, string lockID, TimeSpan lockDuration )
+		{
+			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.APPLEVEL2, lockDuration);
+		}
 
 
 		/// <summary>
@@ -152,6 +172,10 @@ namespace SlugEnt.Locker
 		{
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.APPLEVEL3, new TimeSpan(0, 0, 0,0,ttl));
+		}
+		public async Task<bool> SetLockAppLevel3(string lockCategory, string lockID, TimeSpan lockDuration)
+		{
+			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), LockTypeValues.APPLEVEL3, lockDuration);
 		}
 
 
@@ -244,6 +268,13 @@ namespace SlugEnt.Locker
 			set { _lockTTL = value; }
 		}
 
+
+		/// <summary>
+		/// Returns what the Lock Prefix is
+		/// </summary>
+		public string LockPrefix {
+			get { return _lockPrefix; }
+		}
 
 		/// <summary>
 		/// Builds the Lock Key
