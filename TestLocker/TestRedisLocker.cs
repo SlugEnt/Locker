@@ -10,7 +10,6 @@ using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace SlugEnt.TestRedisLocker
 {
-//	[Parallelizable(ParallelScope.Fixtures)]
 	[Parallelizable(ParallelScope.All)]
 	public class Tests
 	{
@@ -283,7 +282,6 @@ namespace SlugEnt.TestRedisLocker
 		[Test]
 		public async Task LockCount()
 		{
-			string testID_1 = _idGenerator.Next(1000, 19999).ToString();
 			string lockCategory = _uniqueKeys.GetKey("LC22");
 
 			// Get initial count of locks
@@ -494,7 +492,6 @@ namespace SlugEnt.TestRedisLocker
 		// Generates a random number of locks and sets them in Redis
 		internal async Task<int> GenerateRandomLocks(string lockCategory, int min, int max)
 		{
-			Random lockNumber = new Random();
 			int maxLocks = new Random().Next(min, max);
 			int startingId = _idGenerator.Next(18000, 18899);
 			int j = 0;

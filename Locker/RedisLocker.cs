@@ -13,10 +13,10 @@ namespace SlugEnt.Locker
 	/// Provides a Locker backed by a Redis Database to be used for locking objects across a distributed system in a quick and easy manner.
 	/// </summary>
 	public class RedisLocker : ILocker {
-		private RedisCacheClient _redisCacheClient;
+		private readonly RedisCacheClient _redisCacheClient;
 		private readonly IRedisDatabase _redisDB;
-		private bool _isDedicatedLockDatabase;
-		private string _lockPrefix = "L^";
+		private readonly bool _isDedicatedLockDatabase;
+		private readonly string _lockPrefix = "L^";
 		private int _lockTTL = DEFAULT_LOCK_TTL;
 
 		private const int DEFAULT_LOCK_TTL = 300000; // 300 seconds.
