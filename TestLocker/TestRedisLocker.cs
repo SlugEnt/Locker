@@ -19,12 +19,7 @@ namespace SlugEnt.TestRedisLocker
 		private Random _idGenerator;
 		private UniqueKeys _uniqueKeys;
 
-		private string _lockType1 = "A.App1";
-		private string _lockType2 = "B.App1";
-		private string _lockType3 = "B.App2";
-		
-
-
+	
 		[OneTimeSetUp]
 		public async Task InitialSetup()
 		{
@@ -50,7 +45,7 @@ namespace SlugEnt.TestRedisLocker
 
 
 		[SetUp]
-		public async Task Setup()
+		public void Setup()
 		{
 		}
 
@@ -62,7 +57,7 @@ namespace SlugEnt.TestRedisLocker
 			string lockCategory = _uniqueKeys.GetKey("SSL");
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLock(lockCategory, id), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLock(lockCategory, id, "SetSimple"), "A10:  Lock was not set");
 		}
 
 
@@ -72,13 +67,15 @@ namespace SlugEnt.TestRedisLocker
 		{
 			string id = _idGenerator.Next().ToString();
 			string lockCategory = _uniqueKeys.GetKey("SLE");
+			string comment = "Exclusive";
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLockExclusive(lockCategory, id), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLockExclusive(lockCategory, id, comment), "A10:  Lock was not set");
 
 			// Make sure Exclusive Lock was set.
 			LockObject lockObj =  await _locker.LockInfo(lockCategory, id);
 			Assert.AreEqual(LockType.Exclusive, lockObj.Type);
+			Assert.AreEqual(comment,lockObj.Comment);
 		}
 
 
@@ -88,14 +85,15 @@ namespace SlugEnt.TestRedisLocker
 		{
 			string id = _idGenerator.Next().ToString();
 			string lockCategory = _uniqueKeys.GetKey("SLRO");
-
+			string lockComment = "ReadOnly";
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLockReadOnly(lockCategory, id), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLockReadOnly(lockCategory, id, lockComment), "A10:  Lock was not set");
 
 			// Make sure Exclusive Lock was set.
 			LockObject lockObj = await _locker.LockInfo(lockCategory, id);
 			Assert.AreEqual(LockType.ReadOnly, lockObj.Type);
+			Assert.AreEqual(lockComment, lockObj.Comment);
 		}
 
 
@@ -105,13 +103,15 @@ namespace SlugEnt.TestRedisLocker
 		{
 			string id = _idGenerator.Next().ToString();
 			string lockCategory = _uniqueKeys.GetKey("SLAL1");
+			string lockComment = "AppL1";
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLockAppLevel1(lockCategory, id), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLockAppLevel1(lockCategory, id, lockComment), "A10:  Lock was not set");
 
 			// Make sure Exclusive Lock was set.
 			LockObject lockObj = await _locker.LockInfo(lockCategory, id);
 			Assert.AreEqual(LockType.AppLevel1, lockObj.Type);
+			Assert.AreEqual(lockComment, lockObj.Comment);
 		}
 
 
@@ -122,13 +122,15 @@ namespace SlugEnt.TestRedisLocker
 		{
 			string id = _idGenerator.Next().ToString();
 			string lockCategory = _uniqueKeys.GetKey("SLAL2");
+			string lockComment = "AppL2";
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLockAppLevel2(lockCategory, id), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLockAppLevel2(lockCategory, id, lockComment), "A10:  Lock was not set");
 
 			// Make sure Exclusive Lock was set.
 			LockObject lockObj = await _locker.LockInfo(lockCategory, id);
 			Assert.AreEqual(LockType.AppLevel2, lockObj.Type);
+			Assert.AreEqual(lockComment, lockObj.Comment);
 		}
 
 
@@ -138,13 +140,15 @@ namespace SlugEnt.TestRedisLocker
 		{
 			string id = _idGenerator.Next().ToString();
 			string lockCategory = _uniqueKeys.GetKey("SLAL3");
+			string lockComment = "AppL3";
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLockAppLevel3(lockCategory, id), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLockAppLevel3(lockCategory, id, lockComment), "A10:  Lock was not set");
 
 			// Make sure Exclusive Lock was set.
 			LockObject lockObj = await _locker.LockInfo(lockCategory, id);
 			Assert.AreEqual(LockType.AppLevel3, lockObj.Type);
+			Assert.AreEqual(lockComment, lockObj.Comment);
 		}
 
 
@@ -166,6 +170,7 @@ namespace SlugEnt.TestRedisLocker
 			await rl.FlushAllLocks();
 			rl.TTL = 300;
 			int ttl2 = 2000;
+			string lockComment = "FX:11-01-19";
 
 			LockType lockType = (LockType) lockTypeInt;
 
@@ -173,20 +178,25 @@ namespace SlugEnt.TestRedisLocker
 			string lockCategory = _uniqueKeys.GetKey("SLFST");
 
 			// TestID_1:  Set Lock using base lock method with default TTL
-			Assert.IsTrue(await rl.SetLock(lockCategory, testID_1,lockType), "A10:  Base SetLock did not work for LockType: {0}", lockType);
+			Assert.IsTrue(await rl.SetLock(lockCategory, testID_1, lockComment, lockType), "A10:  Base SetLock did not work for LockType: {0}", lockType);
 
 			// Make sure the correct type of Lock was set.
 			LockObject lockObj = await rl.LockInfo(lockCategory, testID_1);
 			Assert.AreEqual(lockType, lockObj.Type, "A11:  Lock was supposed to be set to {0}, but actually was {1}", lockType,lockObj.Type);
 
+			// Make sure it's comment is on it.
+			Assert.AreEqual(lockComment, lockObj.Comment, "A12:  Lock Comment is incorrect");
+
 			// TestID_2:  Create a standard lock, but with a time in milli-second override
 			string testID_2 = _idGenerator.Next(4000, 4999).ToString();
-			Assert.IsTrue(await rl.SetLock(lockCategory, testID_2, lockType, ttl2), "A12:  Base SetLock with time override did not work for LockType: {0}", lockType);
+			Assert.IsTrue(await rl.SetLock(lockCategory, testID_2, lockComment, lockType, ttl2), "A13:  Base SetLock with time override did not work for LockType: {0}", lockType);
 
 			// TestID_3:  Create a standard lock, but with a TimeSpan override
 			string testID_3 = _idGenerator.Next(5000, 5999).ToString();
 			TimeSpan t5 = new TimeSpan(0,0,0,2);
-			Assert.IsTrue(await rl.SetLock(lockCategory, testID_3, t5 ), "A12:  Base SetLock with time override did not work for LockType: {0}", lockType);
+			Assert.IsTrue(await rl.SetLock(lockCategory, testID_3, lockComment, t5 ), "A14:  Base SetLock with time override did not work for LockType: {0}", lockType);
+			// Make sure it's comment is on it.
+			Assert.AreEqual(lockComment, lockObj.Comment, "A15:  Lock Comment is incorrect");
 
 			// TestID_4-6:  Create a lock of a specific type and then test with default TTL (TestID_4), milli-sec override (TestID_5) and TimeSpan override (TestID_6)
 			string testID_4 = _idGenerator.Next(2000, 2999).ToString();
@@ -197,41 +207,44 @@ namespace SlugEnt.TestRedisLocker
 			// Now set lock using Specific Method
 			switch ( lockType ) {
 				case LockType.Exclusive: 
-					Assert.IsTrue(await rl.SetLockExclusive(lockCategory,testID_4), "A20: Exclusive SetLock failed.");
-					Assert.IsTrue(await rl.SetLockExclusive(lockCategory, testID_5,ttl2), "A20B: Exclusive SetLock failed.");
-					Assert.IsTrue(await rl.SetLockExclusive(lockCategory, testID_6, t6), "A20C: Exclusive SetLock failed.");
+					Assert.IsTrue(await rl.SetLockExclusive(lockCategory,testID_4, lockComment), "A20: Exclusive SetLock failed.");
+					Assert.IsTrue(await rl.SetLockExclusive(lockCategory, testID_5, lockComment, ttl2), "A20B: Exclusive SetLock failed.");
+					Assert.IsTrue(await rl.SetLockExclusive(lockCategory, testID_6, lockComment, t6), "A20C: Exclusive SetLock failed.");
 					break;
 				case LockType.ReadOnly:
-					Assert.IsTrue(await rl.SetLockReadOnly(lockCategory, testID_4), "A21: ReadOnly SetLock failed.");
-					Assert.IsTrue(await rl.SetLockReadOnly(lockCategory, testID_5, ttl2), "A21B: ReadOnly SetLock failed.");
-					Assert.IsTrue(await rl.SetLockReadOnly(lockCategory, testID_6, t6), "A21C: ReadOnly SetLock failed.");
+					Assert.IsTrue(await rl.SetLockReadOnly(lockCategory, testID_4, lockComment), "A21: ReadOnly SetLock failed.");
+					Assert.IsTrue(await rl.SetLockReadOnly(lockCategory, testID_5, lockComment, ttl2), "A21B: ReadOnly SetLock failed.");
+					Assert.IsTrue(await rl.SetLockReadOnly(lockCategory, testID_6, lockComment, t6), "A21C: ReadOnly SetLock failed.");
 
 					break;
 				case LockType.AppLevel1:
-					Assert.IsTrue(await rl.SetLockAppLevel1(lockCategory, testID_4), "A23: AppLevel1 SetLock failed.");
-					Assert.IsTrue(await rl.SetLockAppLevel1(lockCategory, testID_5, ttl2), "A23B: AppLevel1 SetLock failed.");
-					Assert.IsTrue(await rl.SetLockAppLevel1(lockCategory, testID_6, t6), "A23C: AppLevel1 SetLock failed.");
+					Assert.IsTrue(await rl.SetLockAppLevel1(lockCategory, testID_4, lockComment), "A23: AppLevel1 SetLock failed.");
+					Assert.IsTrue(await rl.SetLockAppLevel1(lockCategory, testID_5, lockComment, ttl2), "A23B: AppLevel1 SetLock failed.");
+					Assert.IsTrue(await rl.SetLockAppLevel1(lockCategory, testID_6, lockComment, t6), "A23C: AppLevel1 SetLock failed.");
 
 					break;
 				case LockType.AppLevel2:
-					Assert.IsTrue(await rl.SetLockAppLevel2(lockCategory, testID_4), "A24: AppLevel2 SetLock failed.");
-					Assert.IsTrue(await rl.SetLockAppLevel2(lockCategory, testID_5, ttl2), "A24B: AppLevel2 SetLock failed.");
-					Assert.IsTrue(await rl.SetLockAppLevel2(lockCategory, testID_6, t6), "A24C: AppLevel2 SetLock failed.");
+					Assert.IsTrue(await rl.SetLockAppLevel2(lockCategory, testID_4, lockComment), "A24: AppLevel2 SetLock failed.");
+					Assert.IsTrue(await rl.SetLockAppLevel2(lockCategory, testID_5, lockComment, ttl2), "A24B: AppLevel2 SetLock failed.");
+					Assert.IsTrue(await rl.SetLockAppLevel2(lockCategory, testID_6, lockComment, t6), "A24C: AppLevel2 SetLock failed.");
 					break;
 				case LockType.AppLevel3:
-					Assert.IsTrue(await rl.SetLockAppLevel3(lockCategory, testID_4), "A25: AppLevel3 SetLock failed.");
-					Assert.IsTrue(await rl.SetLockAppLevel3(lockCategory, testID_5, ttl2), "A25B: AppLevel3 SetLock failed.");
-					Assert.IsTrue(await rl.SetLockAppLevel3(lockCategory, testID_6, t6), "A25C: AppLevel3 SetLock failed.");
+					Assert.IsTrue(await rl.SetLockAppLevel3(lockCategory, testID_4, lockComment), "A25: AppLevel3 SetLock failed.");
+					Assert.IsTrue(await rl.SetLockAppLevel3(lockCategory, testID_5, lockComment, ttl2), "A25B: AppLevel3 SetLock failed.");
+					Assert.IsTrue(await rl.SetLockAppLevel3(lockCategory, testID_6, lockComment, t6), "A25C: AppLevel3 SetLock failed.");
 					break;
 			}
 
+			// Validate the Lock was created correctly
 			lockObj = await rl.LockInfo(lockCategory, testID_4);
 			Assert.AreEqual(lockType, lockObj.Type, "A30:  Lock was supposed to be set to {0}, but actually was {1}", lockType, lockObj.Type);
+			Assert.AreEqual(lockComment, lockObj.Comment, "A30A:  Lock Comment is incorrect");
 			lockObj = await rl.LockInfo(lockCategory, testID_5);
 			Assert.AreEqual(lockType, lockObj.Type, "A31:  Lock was supposed to be set to {0}, but actually was {1}", lockType, lockObj.Type);
+			Assert.AreEqual(lockComment, lockObj.Comment, "A31A:  Lock Comment is incorrect");
 			lockObj = await rl.LockInfo(lockCategory, testID_6);
 			Assert.AreEqual(lockType, lockObj.Type, "A32:  Lock was supposed to be set to {0}, but actually was {1}", lockType, lockObj.Type);
-
+			Assert.AreEqual(lockComment, lockObj.Comment, "A32A:  Lock Comment is incorrect");
 
 			// Validate all default ttl locks are expired - indicating they were using the default ttl
 			Thread.Sleep(rl.TTL);
@@ -256,7 +269,7 @@ namespace SlugEnt.TestRedisLocker
 			string lockCategory = _uniqueKeys.GetKey("DL");
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLock(lockCategory, testID_1), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLock(lockCategory, testID_1, "DelLock"), "A10:  Lock was not set");
 
 			// Delete the lock
 			Assert.IsTrue(await _locker.DeleteLock(lockCategory, testID_1), "A20:  Deletion of Lock failed");
@@ -310,7 +323,7 @@ namespace SlugEnt.TestRedisLocker
 			string lockCategory = _uniqueKeys.GetKey("LEWC");
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLock(lockCategory, id), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLock(lockCategory, id,"LockExists"), "A10:  Lock was not set");
 
 			// Make sure it exists
 			Assert.IsTrue(await _locker.Exists(lockCategory, id), "A20:  Lock should have existed after setting, but does not.");
@@ -389,7 +402,7 @@ namespace SlugEnt.TestRedisLocker
 			int expireMSeconds = 2000;
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLock(lockCategory, id, LockType.Exclusive, expireMSeconds), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLock(lockCategory, id, "Comment",LockType.Exclusive, expireMSeconds), "A10:  Lock was not set");
 
 			// Validate Lock exists
 			Assert.IsTrue(await _locker.Exists(lockCategory, id));
@@ -417,7 +430,7 @@ namespace SlugEnt.TestRedisLocker
 			int expireMSeconds = 2000;
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLock(lockCategory, id, LockType.Exclusive, expireMSeconds), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLock(lockCategory, id, "Comment",LockType.Exclusive, expireMSeconds), "A10:  Lock was not set");
 
 			// Validate Lock exists
 			Assert.IsTrue(await _locker.Exists(lockCategory, id));
@@ -440,9 +453,10 @@ namespace SlugEnt.TestRedisLocker
 		public async Task GetExistingLock (LockType lockType) {
 			string id = _idGenerator.Next(34000, 49999).ToString();
 			string lockCategory = _uniqueKeys.GetKey("GEL");
+			string lockComment = "Internal:12-10-96:male";
 
 			// Set Lock
-			Assert.IsTrue(await _locker.SetLock(lockCategory, id, lockType,300), "A10:  Lock was not set");
+			Assert.IsTrue(await _locker.SetLock(lockCategory, id, lockComment,lockType,300), "A10:  Lock was not set");
 
 			// Validate Lock exists
 			Assert.IsTrue(await _locker.Exists(lockCategory, id));
@@ -451,6 +465,9 @@ namespace SlugEnt.TestRedisLocker
 			LockObject lockObject = await _locker.GetLock(lockCategory, id);
 			Assert.AreEqual(id, lockObject.ID);
 			Assert.AreEqual(lockType,lockObject.Type);
+			Assert.AreEqual(lockComment, lockObject.Comment);
+			Assert.AreEqual(lockCategory, lockObject.Category);
+			Assert.AreEqual(_locker.LockPrefix, lockObject.Prefix);
 		}
 
 
@@ -468,7 +485,7 @@ namespace SlugEnt.TestRedisLocker
 			Assert.AreEqual(ttl,testLocker.TTL);
 
 			// Create a lock with no time in method, to see if default is used.
-			Assert.IsTrue(await testLocker.SetLock(lockCategory,id));
+			Assert.IsTrue(await testLocker.SetLock(lockCategory,id,"Comment"));
 			Thread.Sleep( ttl + 250);
 			Assert.IsFalse(await testLocker.Exists(lockCategory, id));
 		}
@@ -483,7 +500,7 @@ namespace SlugEnt.TestRedisLocker
 			int j = 0;
 			for ( int i = 0; i < maxLocks; i++, j++) {
 				string id = (startingId + j).ToString();
-				Assert.IsTrue(await _locker.SetLock(lockCategory, id), "A1000:  Lock was not set");
+				Assert.IsTrue(await _locker.SetLock(lockCategory, id, "Comment"), "A1000:  Lock was not set");
 			}
 
 			return maxLocks;
@@ -531,6 +548,23 @@ namespace SlugEnt.TestRedisLocker
 
 			Assert.AreEqual(expected, result);
 
+		}
+
+
+		// Validates that SetLockValue puts the LockType in the first character position and then the comment follows it
+		[TestCase(LockType.Exclusive)]
+		[TestCase(LockType.ReadOnly)]
+		[TestCase(LockType.AppLevel1)]
+		[TestCase(LockType.AppLevel2)]
+		[TestCase(LockType.AppLevel1)]
+		[Test]
+		public void SetLockValueTest (LockType lockType) {
+			string comment = "a value:12-10-96:Female:Germany";
+
+			string lockValue = _locker.SetLockValue(lockType, comment);
+			
+			string expected = (LockTypeValues.ValuesAsStrings[(int)lockType] + comment);
+			Assert.AreEqual(expected,lockValue);
 		}
 		#endregion
 	}

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Channels;
 
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 [assembly: InternalsVisibleTo("TestLocker")]
  
@@ -18,16 +19,18 @@ namespace Locker
 		/// <summary>
 		/// Builds a LockObject object.
 		/// </summary>
-		/// <param name="prefix">The Locker Prefix value.  This only has meaning when recieving this object from a Locker call.
+		/// <param name="prefix">The Locker Prefix value.  This only has meaning when receiving this object from a Locker call.
 		/// It's value is not used when creating a lock</param>
 		/// <param name="lockCategory">The category this lock belongs to</param>
 		/// <param name="lockID">The specific identifier that associates this lock to an object</param>
 		/// <param name="type">The type of lock you want.</param>
-		public LockObject (string prefix, string lockCategory, string lockID, LockType type) {
+		/// <param name="comment">Any clarifying information about the lock, such as userID, datetime, etc</param>
+		public LockObject (string prefix, string lockCategory, string lockID, LockType type, string comment) {
 			Prefix = prefix; 
 			ID = lockID;
 			Category = lockCategory;
 			Type = type;
+			Comment = comment;
 		}
 
 
@@ -39,13 +42,15 @@ namespace Locker
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
 		/// <param name="typeAsString">The Redis String value of the Lock Type</param>
-		internal LockObject (string prefix, string lockCategory, string lockID, string typeAsString)
+		/// <param name="comment">Any clarifying information about the lock, such as userID, datetime, etc</param>
+		internal LockObject (string prefix, string lockCategory, string lockID, string lockTypeAsString, string comment)   
 		{
 			Prefix = prefix;
 			ID = lockID;
 			Category = lockCategory;
-
-			Type = typeAsString switch
+			Comment = comment;
+			
+			Type = lockTypeAsString switch
 			{
 				"" => LockType.NoLock,
 				LockTypeValues.EXCLUSIVE => LockType.Exclusive,
@@ -77,6 +82,10 @@ namespace Locker
 		/// The Type of lock that this is.
 		/// </summary>
 		public LockType Type { get; set; }
-
+		
+		/// <summary>
+		/// Any information the lock setter wanted to pass onto the lock, such as the userId who has the lock, or the datetime it was created, etc.
+		/// </summary>
+		public string Comment { get; set; }
 	}
 }

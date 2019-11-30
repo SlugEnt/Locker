@@ -7,15 +7,15 @@ using Locker;
 namespace SlugEnt.Locker
 {
 	public interface ILocker {
-		Task<bool> SetLock (string lockCategory, string lockId, LockType lockType, int lockDurationSeconds);
-		Task<bool> SetLockExclusive (string lockCategory, string lockId, int lockDurationSeconds);
-		Task<bool> SetLockReadOnly(string lockCategory, string lockId, int lockDurationSeconds);
+		Task<bool> SetLock (string lockCategory, string lockId, string comment, LockType lockType, int lockDurationSeconds);
+		Task<bool> SetLockExclusive (string lockCategory, string lockId, string comment, int lockDurationSeconds);
+		Task<bool> SetLockReadOnly(string lockCategory, string lockId, string comment, int lockDurationSeconds);
 
-		Task<bool> SetLockAppLevel1(string lockCategory, string lockId, int lockDurationSeconds);
+		Task<bool> SetLockAppLevel1(string lockCategory, string lockId, string comment, int lockDurationSeconds);
 
-		Task<bool> SetLockAppLevel2(string lockCategory, string lockId, int lockDurationSeconds);
+		Task<bool> SetLockAppLevel2(string lockCategory, string lockId, string comment, int lockDurationSeconds);
 
-		Task<bool> SetLockAppLevel3(string lockCategory, string lockId, int lockDurationSeconds);
+		Task<bool> SetLockAppLevel3(string lockCategory, string lockId, string comment, int lockDurationSeconds);
 
 
 

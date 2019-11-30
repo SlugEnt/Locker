@@ -15,13 +15,16 @@ namespace TestLocker
 			string prefix = "^";
 			string lockCategory = "test";
 			string lockId = "trgortg";
+			string lockComment = "Some Text";
+
 			LockType lockType = LockType.Exclusive;
 
-			LockObject lockObject = new LockObject(prefix, lockCategory,lockId,lockType);
+			LockObject lockObject = new LockObject(prefix, lockCategory,lockId,lockType,lockComment);
 			Assert.AreEqual(prefix, lockObject.Prefix);
 			Assert.AreEqual(lockCategory,lockObject.Category);
 			Assert.AreEqual(lockId, lockObject.ID);
 			Assert.AreEqual(lockType, lockObject.Type);
+			Assert.AreEqual(lockComment, lockObject.Comment);
 		}
 
 
@@ -38,14 +41,14 @@ namespace TestLocker
 			string prefix = "^";
 			string lockType = "test";
 			string lockId = "trgortg";
-			
+			string lockComment = "Some Internal Text";
 
-			LockObject lockObject = new LockObject(prefix, lockType, lockId, settingAsString);
+			LockObject lockObject = new LockObject(prefix, lockType, lockId, settingAsString, lockComment);
 			Assert.AreEqual(prefix, lockObject.Prefix);
 			Assert.AreEqual(lockType, lockObject.Category);
 			Assert.AreEqual(lockId, lockObject.ID);
 			Assert.AreEqual(expType, lockObject.Type);
-
+			Assert.AreEqual(lockComment, lockObject.Comment);
 		}
 	}
 }
