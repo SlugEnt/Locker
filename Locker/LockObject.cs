@@ -41,7 +41,7 @@ namespace Locker
 		/// <param name="prefix">The Lock Engine prefix value</param>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
-		/// <param name="typeAsString">The Redis String value of the Lock Type</param>
+		/// <param name="lockTypeAsString">The Redis String value of the Lock Type</param>
 		/// <param name="comment">Any clarifying information about the lock, such as userID, datetime, etc</param>
 		internal LockObject (string prefix, string lockCategory, string lockID, string lockTypeAsString, string comment)   
 		{

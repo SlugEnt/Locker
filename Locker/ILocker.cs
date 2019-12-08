@@ -6,6 +6,8 @@ using Locker;
 
 namespace SlugEnt.Locker
 {
+#pragma warning disable CS1591
+
 	public interface ILocker {
 		Task<bool> SetLock (string lockCategory, string lockId, string comment, LockType lockType, int lockDurationSeconds);
 		Task<bool> SetLockExclusive (string lockCategory, string lockId, string comment, int lockDurationSeconds);

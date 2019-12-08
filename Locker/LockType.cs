@@ -46,15 +46,45 @@ namespace Locker
 
 	}
 
-	// This char array must match the above enum. 
+
+
+	/// <summary>
+	/// Class that represents the String values for the Lock Type Enum's.  
+	/// </summary>
 	public static class LockTypeValues {
+		/// <summary>
+		/// A ReadOnly Lock.  Everyone but the Locker can read the object, only the Locker can update it.
+		/// </summary>
 		public const string READONLY = "R";
+
+		/// <summary>
+		/// No one should be able to access the object at all, except the Locker.
+		/// </summary>
 		public const string EXCLUSIVE = "X";
+
+		/// <summary>
+		/// Defined within the application
+		/// </summary>
 		public const string APPLEVEL1 = "A";
+
+		/// <summary>
+		/// Defined within the application
+		/// </summary>
 		public const string APPLEVEL2 = "B";
+
+		/// <summary>
+		/// Defined within the application
+		/// </summary>
 		public const string APPLEVEL3 = "C";
+
+		/// <summary>
+		/// Indicates there is no lock.  Generally this should never be used by the application, it is here to indicate an error situation.
+		/// </summary>
 		public const string NOLOCK = "0";
 
+		/// <summary>
+		/// Returns the string value of the given Enumeration value.
+		/// </summary>
 		public static readonly string[] ValuesAsStrings = { READONLY, EXCLUSIVE, APPLEVEL1, APPLEVEL2, APPLEVEL3, NOLOCK};
 	}
 }

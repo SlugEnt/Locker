@@ -47,7 +47,7 @@ namespace SlugEnt.Locker
 		/// Determines if a lock exists for the given lockCategory and LockID
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
-		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="lockId">The ID value of the lock object</param>
 		/// <returns></returns>
 		public async Task<bool> Exists (string lockCategory, string lockId) { return await _redisDB.ExistsAsync(BuildLockKey(lockCategory, lockId)); }
 
@@ -56,8 +56,8 @@ namespace SlugEnt.Locker
 		/// Returns a LockObject if a lock is set and if so, the type of lock that is set.  If your application only has one type of lock then calling Exists is much faster and recommended.
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
-		/// <param name="lockID">The ID value of the lock object</param>
-		/// <returns></returns>
+		/// <param name="lockId">The ID value of the lock object</param>
+		/// <returns>Null if Lock is not found</returns>
 		public async Task<LockObject> GetLock (string lockCategory, string lockId) {
 			string value = await _redisDB.GetAsync<string>(BuildLockKey(lockCategory, lockId));
 			if ( value == null ) { return null;}
@@ -83,15 +83,22 @@ namespace SlugEnt.Locker
 		internal string SetLockValue (LockType lockType, string comment) { return (LockTypeValues.ValuesAsStrings [(int) lockType] + comment); }
 
 
+		/// <summary>
+		/// Builds the lock value field, which is the type of lock (first character) and then a comment (everything after 1st char)
+		/// </summary>
+		/// <param name="lockTypeAsString">The type of Lock</param>
+		/// <param name="comment">The comment that belongs with the lock</param>
+		/// <returns></returns>
 		internal string SetLockValue (string lockTypeAsString, string comment) { return (lockTypeAsString + comment);}
 
 
-	/// <summary>
+		/// <summary>
 		/// Sets a lock for the given lockCategory with the Identifier provided.  If you know the specific type of lock you want to set, it is better to
 		/// call the SetLockType methods.  They result in less GC and system overhead and are faster.
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
 		/// <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
 		/// <param name="lockType">The Type of lock you want.</param>
 		/// <returns></returns>
@@ -99,6 +106,17 @@ namespace SlugEnt.Locker
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(lockType, comment), new TimeSpan(0, 0, 0,0,ttl));
 			}
+
+		/// <summary>
+		/// Sets a lock for the given lockCategory with the Identifier provided.  If you know the specific type of lock you want to set, it is better to
+		/// call the SetLockType methods.  They result in less GC and system overhead and are faster.
+		/// </summary>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+		/// <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
+		/// <param name="lockType">The Type of lock you want.</param>
+		/// <returns></returns>		
 		public async Task<bool> SetLock(string lockCategory, string lockID, string comment, TimeSpan lockDuration, LockType lockType = LockType.Exclusive)
 		{
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(lockType, comment), lockDuration);
@@ -111,6 +129,7 @@ namespace SlugEnt.Locker
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
 		/// <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLockExclusive (string lockCategory, string lockID, string comment, int lockDuration = 0)
@@ -118,6 +137,17 @@ namespace SlugEnt.Locker
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.EXCLUSIVE, comment), new TimeSpan(0, 0, 0,0,ttl));
 		}
+
+
+		/// <summary>
+		/// Sets an Exclusive lock for the given lockCategory with the Identifier provided.  An Exclusive lock means only 1 entity can access the object while
+		/// the lock is set.
+		/// </summary>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+		/// <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
+		/// <returns></returns>
 		public async Task<bool> SetLockExclusive(string lockCategory, string lockID, string comment, TimeSpan lockDuration)
 		{
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.EXCLUSIVE, comment), lockDuration);
@@ -130,6 +160,7 @@ namespace SlugEnt.Locker
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
 		/// <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLockReadOnly(string lockCategory, string lockID, string comment, int lockDuration = 0)
@@ -137,6 +168,17 @@ namespace SlugEnt.Locker
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.READONLY,comment), new TimeSpan(0, 0, 0,0,ttl));
 		}
+
+		
+		/// <summary>
+		/// Sets a ReadOnly lock for the given lockCategory with the Identifier provided.  ReadOnly, means that the entity that initiated the lock is the only
+		/// one who can update it, but all others are able to read.
+		/// </summary>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+		/// <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
+		/// <returns></returns>
 		public async Task<bool> SetLockReadOnly(string lockCategory, string lockID, string comment, TimeSpan lockDuration)
 		{
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.READONLY,comment), lockDuration);
@@ -148,6 +190,7 @@ namespace SlugEnt.Locker
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
 		/// <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel1(string lockCategory, string lockID, string comment, int lockDuration = 0)
@@ -155,6 +198,15 @@ namespace SlugEnt.Locker
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.APPLEVEL1,comment), new TimeSpan(0, 0, 0,0,ttl));
 		}
+
+		/// <summary>
+		/// Sets an AppLevel1 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
+		/// </summary>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+		/// <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
+		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel1(string lockCategory, string lockID, string comment, TimeSpan lockDuration)
 		{
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.APPLEVEL1,comment), lockDuration);
@@ -166,6 +218,7 @@ namespace SlugEnt.Locker
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
 		/// <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel2(string lockCategory, string lockID, string comment, int lockDuration = 0)
@@ -173,6 +226,16 @@ namespace SlugEnt.Locker
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.APPLEVEL2,comment), new TimeSpan(0, 0, 0,0,ttl));
 		}
+
+
+		/// <summary>
+		/// Sets an AppLevel2 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
+		/// </summary>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+		/// <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
+		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel2(string lockCategory, string lockID, string comment, TimeSpan lockDuration )
 		{
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.APPLEVEL2,comment), lockDuration);
@@ -184,6 +247,7 @@ namespace SlugEnt.Locker
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
 		/// <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel3(string lockCategory, string lockID, string comment, int lockDuration = 0)
@@ -191,6 +255,16 @@ namespace SlugEnt.Locker
 			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.APPLEVEL3,comment), new TimeSpan(0, 0, 0,0,ttl));
 		}
+
+		/// <summary>
+		/// Sets an AppLevel3 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
+		/// </summary>
+		/// <param name="lockCategory">The lockCategory of the lock</param>
+		/// <param name="lockID">The ID value of the lock object</param>
+		/// <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+		/// <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
+		/// <returns></returns>
+
 		public async Task<bool> SetLockAppLevel3(string lockCategory, string lockID, string comment, TimeSpan lockDuration)
 		{
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.APPLEVEL3,comment), lockDuration);
@@ -239,7 +313,7 @@ namespace SlugEnt.Locker
 		/// <returns></returns>
 		public async Task<bool> FlushAllLocks()
 		{
-			//TODO If this is only a lock database, then we can just do a flush.
+			// If this database is dedicated to locks only, then we can just do a flush which is much faster.
 			if (_isDedicatedLockDatabase) await _redisDB.FlushDbAsync();
 			else
 			{
@@ -270,8 +344,8 @@ namespace SlugEnt.Locker
 		/// Retrieves a LockObject that provides information about the lock, including what type of lock it is.
 		/// </summary>
 		/// <param name="lockCategory">The lockCategory of the lock</param>
-		/// <param name="lockID">The ID value of the lock object</param>
-		/// <returns></returns>
+		/// <param name="lockId">The ID value of the lock object</param>
+		/// <returns>Null if the lock does not exist</returns>
 		public async Task<LockObject> LockInfo (string lockCategory, string lockId) {
 			LockObject lockobj = await GetLock(lockCategory, lockId);
 			return lockobj;
@@ -279,7 +353,7 @@ namespace SlugEnt.Locker
 
 
 		/// <summary>
-		/// The Lock TTL in Milliseconds.  Determines the default lock lifetime for a given lock.
+		/// The Lock TTL in Milliseconds.  Determines the default lock lifetime when setting a Lock if it is not overridden in the call method.
 		/// </summary>
 		public int TTL {
 			get { return _lockTTL; }

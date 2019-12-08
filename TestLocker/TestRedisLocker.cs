@@ -202,7 +202,7 @@ namespace SlugEnt.TestRedisLocker
 			string testID_5 = _idGenerator.Next(3000, 3999).ToString();
 			string testID_6 = _idGenerator.Next(6000, 6999).ToString();
 			TimeSpan t6 = new TimeSpan(0,0,0,2);
-			TimeSpan t7 = new TimeSpan(0,2,0,0);
+
 
 			// Now set lock using Specific Method
 			switch ( lockType ) {
