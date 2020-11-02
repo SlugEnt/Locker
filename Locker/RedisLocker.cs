@@ -16,9 +16,6 @@ namespace SlugEnt.Locker
 		private readonly RedisCacheClient _redisCacheClient;
 		private readonly IRedisDatabase _redisDB;
 		private readonly bool _isDedicatedLockDatabase;
-		private readonly string _lockPrefix = "L^";
-		private int _lockTTL = DEFAULT_LOCK_TTL;
-
 		private const int DEFAULT_LOCK_TTL = 300000; // 300 seconds.
 
 
@@ -39,7 +36,7 @@ namespace SlugEnt.Locker
 			_isDedicatedLockDatabase = isDedicatedLockDatabase;
 
 			// Clear the Lock Prefix if this is a dedicated database - no need for it, since everything in the database is a lock entry.
-			if ( isDedicatedLockDatabase ) _lockPrefix = "";
+			if ( isDedicatedLockDatabase ) LockPrefix = "";
 		}
 
 
@@ -69,7 +66,7 @@ namespace SlugEnt.Locker
 			else
 				comment = "";
 
-			LockObject lockObject = new LockObject(_lockPrefix, lockCategory, lockId, lockTypeAsString, comment);
+			LockObject lockObject = new LockObject(LockPrefix, lockCategory, lockId, lockTypeAsString, comment);
 			return lockObject;
 		}
 
@@ -103,7 +100,7 @@ namespace SlugEnt.Locker
 		/// <param name="lockType">The Type of lock you want.</param>
 		/// <returns></returns>
 		public async Task<bool> SetLock(string lockCategory, string lockID, string comment, LockType lockType = LockType.Exclusive, int lockDuration = 0) {
-			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
+			int ttl = lockDuration == 0 ? TTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(lockType, comment), new TimeSpan(0, 0, 0,0,ttl));
 			}
 
@@ -134,7 +131,7 @@ namespace SlugEnt.Locker
 		/// <returns></returns>
 		public async Task<bool> SetLockExclusive (string lockCategory, string lockID, string comment, int lockDuration = 0)
 		{
-			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
+			int ttl = lockDuration == 0 ? TTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.EXCLUSIVE, comment), new TimeSpan(0, 0, 0,0,ttl));
 		}
 
@@ -165,7 +162,7 @@ namespace SlugEnt.Locker
 		/// <returns></returns>
 		public async Task<bool> SetLockReadOnly(string lockCategory, string lockID, string comment, int lockDuration = 0)
 		{
-			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
+			int ttl = lockDuration == 0 ? TTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.READONLY,comment), new TimeSpan(0, 0, 0,0,ttl));
 		}
 
@@ -195,7 +192,7 @@ namespace SlugEnt.Locker
 		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel1(string lockCategory, string lockID, string comment, int lockDuration = 0)
 		{
-			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
+			int ttl = lockDuration == 0 ? TTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.APPLEVEL1,comment), new TimeSpan(0, 0, 0,0,ttl));
 		}
 
@@ -223,7 +220,7 @@ namespace SlugEnt.Locker
 		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel2(string lockCategory, string lockID, string comment, int lockDuration = 0)
 		{
-			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
+			int ttl = lockDuration == 0 ? TTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.APPLEVEL2,comment), new TimeSpan(0, 0, 0,0,ttl));
 		}
 
@@ -252,7 +249,7 @@ namespace SlugEnt.Locker
 		/// <returns></returns>
 		public async Task<bool> SetLockAppLevel3(string lockCategory, string lockID, string comment, int lockDuration = 0)
 		{
-			int ttl = lockDuration == 0 ? _lockTTL : lockDuration;
+			int ttl = lockDuration == 0 ? TTL : lockDuration;
 			return await _redisDB.AddAsync<string>(BuildLockKey(lockCategory, lockID), SetLockValue(LockTypeValues.APPLEVEL3,comment), new TimeSpan(0, 0, 0,0,ttl));
 		}
 
@@ -318,7 +315,7 @@ namespace SlugEnt.Locker
 			else
 			{
 				// Need to do a key search - getting all the keys that start with our lock prefix
-				IEnumerable<string> keys = await _redisDB.SearchKeysAsync(_lockPrefix + "*");
+				IEnumerable<string> keys = await _redisDB.SearchKeysAsync(LockPrefix + "*");
 				await _redisDB.RemoveAllAsync(keys);
 			}
 			return true;
@@ -355,18 +352,13 @@ namespace SlugEnt.Locker
 		/// <summary>
 		/// The Lock TTL in Milliseconds.  Determines the default lock lifetime when setting a Lock if it is not overridden in the call method.
 		/// </summary>
-		public int TTL {
-			get { return _lockTTL; }
-			set { _lockTTL = value; }
-		}
+		public int TTL { get; set; } = DEFAULT_LOCK_TTL;
 
 
 		/// <summary>
 		/// Returns what the Lock Prefix is
 		/// </summary>
-		public string LockPrefix {
-			get { return _lockPrefix; }
-		}
+		public string LockPrefix { get; } = "L^";
 
 		/// <summary>
 		/// Builds the Lock Key
@@ -384,6 +376,6 @@ namespace SlugEnt.Locker
 		/// <param name="lockCategory">The lockCategory of the lock</param>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal string BuildLockPrefix(string lockCategory) { return _lockPrefix + lockCategory + ":"; }
+		internal string BuildLockPrefix(string lockCategory) { return LockPrefix + lockCategory + ":"; }
 	}
 }

@@ -4,17 +4,23 @@ using System.Text;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 using StackExchange.Redis.Extensions.Core.Configuration;
+using StackExchange.Redis.Extensions.Core.Implementations;
+using StackExchange.Redis.Extensions.Core.Models;
 using StackExchange.Redis.Extensions.Newtonsoft;
 
 
 // TODO This can be refactored at some point. But it allows us to test, which is the important thing.
 namespace SlugEnt.TestRedisLocker
 {
+	/// <summary>
+	/// Class used to establish a connection to a Redis Server
+	/// </summary>
 	class RedisCommunicator
 	{
 		public const int RED_LOCKER = 0;
 
 		private RedisCacheClient _redisCacheClient;
+		private IRedisCacheConnectionPoolManager _connectionPoolManager;
 
 
 		public RedisCommunicator() { }
@@ -22,23 +28,22 @@ namespace SlugEnt.TestRedisLocker
 		public bool TalkToRedis()
 		{
 			var serializer = new NewtonsoftSerializer();
-			var config = new RedisConfiguration();
+			RedisConfiguration redisConfig = new RedisConfiguration();
 
-			config.Hosts = new[]
+			redisConfig.Hosts = new[]
 			{
-				new RedisHost { Host = "192.168.1.92", Port = 6379}
+				new RedisHost { Host = "192.168.1.71", Port = 6379}
 			};
 
+			redisConfig.Password = "redis2020";
+			redisConfig.ConnectTimeout = 1000;
+			redisConfig.SyncTimeout = 900;
 
-			config.ConnectTimeout = 1000;
-			config.SyncTimeout = 900;
-
-			//TODO Wondering if this should not be something we turn on just when we need it?
 			// Enable admin mode to allow flushing of the database
-			config.AllowAdmin = true;
+			redisConfig.AllowAdmin = true;
 
-			SingleRedisPool singleRedisPool = new SingleRedisPool(config);
-			_redisCacheClient = new RedisCacheClient(singleRedisPool, serializer, config);
+			_connectionPoolManager = new RedisCacheConnectionPoolManager(redisConfig);
+			_redisCacheClient = new RedisCacheClient(_connectionPoolManager,serializer,redisConfig);
 
 			return true;
 		}
@@ -54,24 +59,3 @@ namespace SlugEnt.TestRedisLocker
 	}
 }
 
-
-
-internal class SingleRedisPool : IRedisCacheConnectionPoolManager
-{
-	private readonly RedisConfiguration redisConfiguration;
-
-	public SingleRedisPool(RedisConfiguration redisConfiguration)
-	{
-		this.redisConfiguration = redisConfiguration;
-	}
-
-	public void Dispose()
-	{
-		redisConfiguration.Connection.Dispose();
-	}
-
-	public IConnectionMultiplexer GetConnection()
-	{
-		return redisConfiguration.Connection;
-	}
-}
