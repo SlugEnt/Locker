@@ -5,7 +5,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyVersion>1.0.8.71</AssemblyVersion>
+    <AssemblyVersion>1.0.8.72</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Locker\Locker.csproj" />
+    <ProjectReference Include="..\..\src\Locker\Locker.csproj" />
   </ItemGroup>
 
 </Project>
