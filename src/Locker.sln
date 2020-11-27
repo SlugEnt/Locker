@@ -8,7 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\Build_Prod.ps1 = ..\Build_Prod.ps1
 		..\Build_Test.ps1 = ..\Build_Test.ps1
 		..\LICENSE.MD = ..\LICENSE.MD
-		README.md = README.md
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Locker", "Locker\Locker.csproj", "{F72FCDE7-5C50-4FE2-9E8C-4B8B4139FA08}"

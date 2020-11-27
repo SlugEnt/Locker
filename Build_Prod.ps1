@@ -1,1 +1,1 @@
-slugnuke.exe --Target PublishProd
+slugnuke.exe --Target PublishProd --Configuration Release

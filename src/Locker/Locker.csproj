@@ -2,17 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyVersion>1.0.1.35</AssemblyVersion>
+    <AssemblyVersion>1.0.1.38</AssemblyVersion>
     <Authors>Scott Herrmann</Authors>
     <Company>Slug Enterprises</Company>
     <Description>General Purpose Distributed Lock Manager utilizing Redis as back end</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Version>1.0.2-rc</Version>
+    <Version>1.0.6-rc-02</Version>
     <PackageId>SlugEnt.Locker</PackageId>
     <PackageLicenseFile>LICENSE.MD</PackageLicenseFile>
     <RepositoryUrl>https://github.com/SlugEnt/Locker</RepositoryUrl>
     <PackageProjectUrl>https://github.com/SlugEnt/Locker</PackageProjectUrl>
     <RepositoryType>GIT</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -26,7 +27,7 @@
     <PackageVersionSettings>AssemblyVersion.NoneWithAutoReset.ReleaseCandidate</PackageVersionSettings>
     <AssemblyInfoVersionType>SettingsVersion</AssemblyInfoVersionType>
     <InheritWinAppVersionFrom>None</InheritWinAppVersionFrom>
-    <DocumentationFile>C:\A_Dev\SlugEnt\Locker\Locker\Locker.xml</DocumentationFile>
+    
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -39,7 +40,6 @@
     <PackageVersionSettings>AssemblyVersion.IncrementWithAutoReset.None</PackageVersionSettings>
     <AssemblyInfoVersionType>SettingsVersion</AssemblyInfoVersionType>
     <InheritWinAppVersionFrom>None</InheritWinAppVersionFrom>
-    <DocumentationFile>C:\A_Dev\SlugEnt\Locker\Locker\Locker.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
