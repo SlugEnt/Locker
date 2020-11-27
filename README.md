@@ -54,7 +54,7 @@ Depending on your application there are other methods that might yield slight pe
 * If you are only using one Type of lock in your app then calling Exists vs GetLock will yield faster results and less GC, since it only needs to return True or False and not interogate the return value and convert into LockType.
 
 ### LockCategory
-LockCategory is a parameter on many of the methods of the locker and for good reason.  It allows you to group locks by category.  In reality it is just a prefix of part of the Lock Key that gets sent to Redis.  So, lets say you were storing locks for 2 types of objects.  One for Addresses and one for people.  Assume the object ID (maybe a database ID) for both an address and a person is a long integer.  Without the LockCategory, you would need to somehow uniquely identify an address with id of 10 and a person with an id of 10.  With LockCategory your call for a persona and an address would be as follows:
+LockCategory is a parameter on many of the methods of the locker and for good reason.  It allows you to group locks by category.  In reality it is just a prefix of part of the Lock Key that gets sent to Redis.  So, lets say you were storing locks for 2 types of objects.  One for Addresses and one for people.  Assume the object ID (maybe a database ID) for both an address and a person is a long integer.  Without the LockCategory, you would need to somehow uniquely identify an address with id of 10 and a person with an id of 10.  With LockCategory your call for a person and an address would be as follows:
 ````csharp
 # Set a lock for address 10
 locker.SetLockExclusive ("ADDRESS","10","comment");
@@ -66,7 +66,7 @@ The LockCategory can be anything you like, but recommendation is to keep as shor
 It is upto the callers to make sure they do not have collissions across their redis environment on LockCategories!
 
 ### Lock Timeouts 
-The default lock timeout is 300 seconds.  But you can set it anytime you call SetLock as it is one of the parameters.
+The default lock timeout is 300 seconds.  But you can set it to any value, you call SetLock as it is one of the parameters.
 You can also extend a lock timeout by calling:
 ````csharp
 locker.UpdateLockExpirationTime("PERSON", "10", 7));
@@ -104,9 +104,6 @@ int count = await locker.LockCount("ApBBB");
 * [Nunit 3.X](https://github.com/nunit/nunit) - Unit Testing
 
 
-## Contributing
-
-Please read 
 
 ## Versioning
 
