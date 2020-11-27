@@ -1,1 +1,1 @@
-slugnuke.exe --Target Publish --Configuration Debug --SkipNuget
+slugnuke.exe --Target Publish --Configuration Debug # --SkipNuget
