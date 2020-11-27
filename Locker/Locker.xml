@@ -1,0 +1,387 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Locker</name>
+    </assembly>
+    <members>
+        <member name="T:SlugEnt.Locker.RedisLocker">
+            <summary>
+            Provides a Locker backed by a Redis Database to be used for locking objects across a distributed system in a quick and easy manner.
+            </summary>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.#ctor(StackExchange.Redis.Extensions.Core.Abstractions.RedisCacheClient,System.Byte,System.Boolean)">
+            <summary>
+            A general purpose ID locking system that utilizes Redis as its backend storage medium.  This is just an in memory store
+            that can be used to determine if some object (based upon its type (name) and unique identifier) are being used elsewhere
+            in the system and thus cannot be accessed.  
+            </summary>
+            <param name="redisCacheClient">Reference to a RedisCacheClient that can be used to communicate with the Redis infrastructure </param>
+            <param name="redisDatabaseNumber">The number of the database that should be used to store locks in.  It is recommended, but not required
+            that locks be stored in a database all to their own.  The reason, is if all locks need to be flushed it can be much faster to flush the
+            entire Database than to work thru all the lock types.</param>
+            <param name="isDedicatedLockDatabase">Set to True, if the database to be used for storing locks is dedicated to this use only or if it
+            is shared with other uses (caching values, etc).  There is a slight performance boost if using dedicated. </param>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.Exists(System.String,System.String)">
+            <summary>
+            Determines if a lock exists for the given lockCategory and LockID
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockId">The ID value of the lock object</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.GetLock(System.String,System.String)">
+            <summary>
+            Returns a LockObject if a lock is set and if so, the type of lock that is set.  If your application only has one type of lock then calling Exists is much faster and recommended.
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockId">The ID value of the lock object</param>
+            <returns>Null if Lock is not found</returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockValue(Locker.LockType,System.String)">
+            <summary>
+            Builds the lock value field, which is the type of lock (first character) and then a comment (everything after 1st char)
+            </summary>
+            <param name="lockType">The type of Lock</param>
+            <param name="comment">The comment that belongs with the lock</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockValue(System.String,System.String)">
+            <summary>
+            Builds the lock value field, which is the type of lock (first character) and then a comment (everything after 1st char)
+            </summary>
+            <param name="lockTypeAsString">The type of Lock</param>
+            <param name="comment">The comment that belongs with the lock</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLock(System.String,System.String,System.String,Locker.LockType,System.Int32)">
+            <summary>
+            Sets a lock for the given lockCategory with the Identifier provided.  If you know the specific type of lock you want to set, it is better to
+            call the SetLockType methods.  They result in less GC and system overhead and are faster.
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
+            <param name="lockType">The Type of lock you want.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLock(System.String,System.String,System.String,System.TimeSpan,Locker.LockType)">
+            <summary>
+            Sets a lock for the given lockCategory with the Identifier provided.  If you know the specific type of lock you want to set, it is better to
+            call the SetLockType methods.  They result in less GC and system overhead and are faster.
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
+            <param name="lockType">The Type of lock you want.</param>
+            <returns></returns>		
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockExclusive(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Sets an Exclusive lock for the given lockCategory with the Identifier provided.  An Exclusive lock means only 1 entity can access the object while
+            the lock is set.
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockExclusive(System.String,System.String,System.String,System.TimeSpan)">
+            <summary>
+            Sets an Exclusive lock for the given lockCategory with the Identifier provided.  An Exclusive lock means only 1 entity can access the object while
+            the lock is set.
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockReadOnly(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Sets a ReadOnly lock for the given lockCategory with the Identifier provided.  ReadOnly, means that the entity that initiated the lock is the only
+            one who can update it, but all others are able to read.
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockReadOnly(System.String,System.String,System.String,System.TimeSpan)">
+            <summary>
+            Sets a ReadOnly lock for the given lockCategory with the Identifier provided.  ReadOnly, means that the entity that initiated the lock is the only
+            one who can update it, but all others are able to read.
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of milli-seconds to maintain the lock, before automatically being freed.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockAppLevel1(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Sets an AppLevel1 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockAppLevel1(System.String,System.String,System.String,System.TimeSpan)">
+            <summary>
+            Sets an AppLevel1 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockAppLevel2(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Sets an AppLevel2 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockAppLevel2(System.String,System.String,System.String,System.TimeSpan)">
+            <summary>
+            Sets an AppLevel2 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockAppLevel3(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Sets an AppLevel3 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.SetLockAppLevel3(System.String,System.String,System.String,System.TimeSpan)">
+            <summary>
+            Sets an AppLevel3 lock for the given lockCategory with the Identifier provided.  The meaning of this is wholly up to the calling application
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="comment">Additional info to be stored along with the lock ID.  For example, the user who has the lock.</param>
+            <param name="lockDuration">The number of seconds to maintain the lock, before automatically being freed.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.DeleteLock(System.String,System.String)">
+            <summary>
+            Deletes the specified lock.  Returns False if the lock did not exist
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.LockCount(System.String)">
+            <summary>
+            Returns the number of Locks there are for the given lockCategory
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.DeleteAllLocksForlockCategory(System.String)">
+            <summary>
+            Removes all locks for the specified lockCategory
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.FlushAllLocks">
+            <summary>
+            Flushes all locks in the database
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.UpdateLockExpirationTime(System.String,System.String,System.Int32)">
+            <summary>
+            Updates the lock expiration time to the new value.  It does not add the new time to existing, but sets it to expire in the given seconds.
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="lockDuration">Number of milli-seconds to set the lock duration for.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.LockInfo(System.String,System.String)">
+            <summary>
+            Retrieves a LockObject that provides information about the lock, including what type of lock it is.
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockId">The ID value of the lock object</param>
+            <returns>Null if the lock does not exist</returns>
+        </member>
+        <member name="P:SlugEnt.Locker.RedisLocker.TTL">
+            <summary>
+            The Lock TTL in Milliseconds.  Determines the default lock lifetime when setting a Lock if it is not overridden in the call method.
+            </summary>
+        </member>
+        <member name="P:SlugEnt.Locker.RedisLocker.LockPrefix">
+            <summary>
+            Returns what the Lock Prefix is
+            </summary>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.BuildLockKey(System.String,System.String)">
+            <summary>
+            Builds the Lock Key
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="id">The ID value of the lock object</param>
+            <returns></returns>
+        </member>
+        <member name="M:SlugEnt.Locker.RedisLocker.BuildLockPrefix(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <returns></returns>
+        </member>
+        <member name="T:Locker.LockObject">
+            <summary>
+            Represents a Locker Lock on a given object.  This is typically used when retrieving lock information from a Locker.
+            </summary>
+        </member>
+        <member name="M:Locker.LockObject.#ctor(System.String,System.String,System.String,Locker.LockType,System.String)">
+            <summary>
+            Builds a LockObject object.
+            </summary>
+            <param name="prefix">The Locker Prefix value.  This only has meaning when receiving this object from a Locker call.
+            It's value is not used when creating a lock</param>
+            <param name="lockCategory">The category this lock belongs to</param>
+            <param name="lockID">The specific identifier that associates this lock to an object</param>
+            <param name="type">The type of lock you want.</param>
+            <param name="comment">Any clarifying information about the lock, such as userID, datetime, etc</param>
+        </member>
+        <member name="M:Locker.LockObject.#ctor(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Builds a LockObject object..  Used internally when building the object as the result of a call to the Redis DB.
+            </summary>
+            <param name="prefix">The Lock Engine prefix value</param>
+            <param name="lockCategory">The lockCategory of the lock</param>
+            <param name="lockID">The ID value of the lock object</param>
+            <param name="lockTypeAsString">The Redis String value of the Lock Type</param>
+            <param name="comment">Any clarifying information about the lock, such as userID, datetime, etc</param>
+        </member>
+        <member name="P:Locker.LockObject.Prefix">
+            <summary>
+            The prefix or Locker Identifier of the lock 
+            </summary>
+        </member>
+        <member name="P:Locker.LockObject.Category">
+            <summary>
+            The category this lock belongs to
+            </summary>
+        </member>
+        <member name="P:Locker.LockObject.ID">
+            <summary>
+            The object identifier this lock is for.
+            </summary>
+        </member>
+        <member name="P:Locker.LockObject.Type">
+            <summary>
+            The Type of lock that this is.
+            </summary>
+        </member>
+        <member name="P:Locker.LockObject.Comment">
+            <summary>
+            Any information the lock setter wanted to pass onto the lock, such as the userId who has the lock, or the datetime it was created, etc.
+            </summary>
+        </member>
+        <member name="T:Locker.LockType">
+            <summary>
+            The allowed Locker lock settings.  These set the type of lock, so that the calling applications know how to handle a locked object.
+            </summary>
+        </member>
+        <member name="F:Locker.LockType.ReadOnly">
+            <summary>
+            A lock has been set in which reads are allowed, but no updates or deletes are allowed.  Callers must understand that the
+            object that is locked may be changed while they are viewing the data, thus resulting in them seeing outdated information.
+            </summary>
+        </member>
+        <member name="F:Locker.LockType.Exclusive">
+            <summary>
+            A lock has been set in which the object that is locked cannot be accessed for any purposes until the entity that set
+            the lock has released it or the locks TTL has expired.  The entity with the lock may update the object however.
+            </summary>
+        </member>
+        <member name="F:Locker.LockType.AppLevel1">
+            <summary>
+            A lock that is defined by the application that uses the lock.  The application determines what functionality is or is not allowed
+            based upon the value of the lock
+            </summary>
+        </member>
+        <member name="F:Locker.LockType.AppLevel2">
+            <summary>
+            A lock that is defined by the application that uses the lock.  The application determines what functionality is or is not allowed
+            based upon the value of the lock
+            </summary>
+        </member>
+        <member name="F:Locker.LockType.AppLevel3">
+            <summary>
+            A lock that is defined by the application that uses the lock.  The application determines what functionality is or is not allowed
+            based upon the value of the lock
+            </summary>
+        </member>
+        <member name="F:Locker.LockType.NoLock">
+            <summary>
+            Indicates no lock exists or is set
+            </summary>
+        </member>
+        <member name="T:Locker.LockTypeValues">
+            <summary>
+            Class that represents the String values for the Lock Type Enum's.  
+            </summary>
+        </member>
+        <member name="F:Locker.LockTypeValues.READONLY">
+            <summary>
+            A ReadOnly Lock.  Everyone but the Locker can read the object, only the Locker can update it.
+            </summary>
+        </member>
+        <member name="F:Locker.LockTypeValues.EXCLUSIVE">
+            <summary>
+            No one should be able to access the object at all, except the Locker.
+            </summary>
+        </member>
+        <member name="F:Locker.LockTypeValues.APPLEVEL1">
+            <summary>
+            Defined within the application
+            </summary>
+        </member>
+        <member name="F:Locker.LockTypeValues.APPLEVEL2">
+            <summary>
+            Defined within the application
+            </summary>
+        </member>
+        <member name="F:Locker.LockTypeValues.APPLEVEL3">
+            <summary>
+            Defined within the application
+            </summary>
+        </member>
+        <member name="F:Locker.LockTypeValues.NOLOCK">
+            <summary>
+            Indicates there is no lock.  Generally this should never be used by the application, it is here to indicate an error situation.
+            </summary>
+        </member>
+        <member name="F:Locker.LockTypeValues.ValuesAsStrings">
+            <summary>
+            Returns the string value of the given Enumeration value.
+            </summary>
+        </member>
+    </members>
+</doc>
