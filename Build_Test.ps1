@@ -1,0 +1,1 @@
+slugnuke.exe --Target Publish
