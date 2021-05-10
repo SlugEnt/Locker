@@ -36,8 +36,8 @@ Locker is pretty easy to use.  There are basically 2 pre-requisites required bef
 
 So getting started:
 ````csharp
-RedisLocker locker = new RedisLocker (redisCacheClient); 
-locker.SetLock("appA", "94545045","a comment");
+RedisLocker locker = new RedisLocker(redisCacheClient); 
+locker.SetLock("appA", "94545045", "a comment");
 bool isThereALock = locker.Exists("appA", "94545045");
 bool isDeleted = locker.DeleteLock("appA", "94545045");
 
@@ -57,9 +57,9 @@ Depending on your application there are other methods that might yield slight pe
 LockCategory is a parameter on many of the methods of the locker and for good reason.  It allows you to group locks by category.  In reality it is just a prefix of part of the Lock Key that gets sent to Redis.  So, lets say you were storing locks for 2 types of objects.  One for Addresses and one for people.  Assume the object ID (maybe a database ID) for both an address and a person is a long integer.  Without the LockCategory, you would need to somehow uniquely identify an address with id of 10 and a person with an id of 10.  With LockCategory your call for a person and an address would be as follows:
 ````csharp
 # Set a lock for address 10
-locker.SetLockExclusive ("ADDRESS","10","comment");
+locker.SetLockExclusive("ADDRESS", "10", "comment");
 # Set a lock for person 10
-locker.SetLockReadOnly ("PERSON","10","comment");
+locker.SetLockReadOnly("PERSON", "10", "comment");
 ````
 
 The LockCategory can be anything you like, but recommendation is to keep as short as possible (2 or 3 characters) as it is part of the lookup key.
@@ -78,19 +78,19 @@ All locks require a comment.  This can just be an empty string.  The comment is 
 
 ### More Examples
 ````csharp
-RedisLocker locker = new RedisLocker (redisCacheClient); 
+RedisLocker locker = new RedisLocker(redisCacheClient); 
 # Set an Exclusive Lock - This is slightly faster than calling SetLock and should be preferred 
 # over SetLock if you kow the type of lock you want to set.
-locker.SetLockExclusive("appA", "945","Mary Poppins:12-32");
+locker.SetLockExclusive("appA", "945", "Mary Poppins:12-32");
 
-LockObject lockObject = await locker.GetLock ("appA", "945");
-Console.WriteLine ("Lock Comment: {0}", lockObject.Comment);
+LockObject lockObject = await locker.GetLock("appA", "945");
+Console.WriteLine("Lock Comment: {0}", lockObject.Comment);
 
 # Create a lock with a TTL of 4 seconds.
-locker.SetLockReadOnly ("ApBBB", "43AB","John Smith",4000);
+locker.SetLockReadOnly("ApBBB", "43AB", "John Smith", 4000);
 
 # Create a lock with a TimeSpan as its TTLS - 2 hours
-locker.SetLockAppLevel1 ("ApBBB", "32H","Pickard",new TimeSpan(0,2,0,0));
+locker.SetLockAppLevel1("ApBBB", "32H", "Pickard", new TimeSpan(0,2,0,0));
 
 # Get the Count of Locks for a given Category:  count = 2
 int count = await locker.LockCount("ApBBB");
