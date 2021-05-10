@@ -63,8 +63,29 @@ namespace SlugEnt.Locker
             string lockTypeAsString = value[0].ToString();
             string comment = value.Length > 1 ? value[1..] : "";
 
-            LockObject lockObject = new LockObject(LockPrefix, lockCategory, lockId, lockTypeAsString, comment);
-            return lockObject;
+            return new LockObject(LockPrefix, lockCategory, lockId, lockTypeAsString, comment);;
+        }
+
+
+        /// <summary>
+        ///     Returns all Locks that exist, or just the locks for a given lockCategory
+        /// </summary>
+        /// <param name="lockCategory"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<LockObject>> GetAllLocks(string lockCategory = null)
+        {
+            string searchPattern = string.IsNullOrWhiteSpace(lockCategory) ? (LockPrefix + "*") : (BuildLockPrefix(lockCategory) + "*"); 
+            IEnumerable<string> keys = await _redisDB.SearchKeysAsync(searchPattern);
+            List<LockObject> lockObjects = new List<LockObject>();
+
+            foreach (string key in keys)
+            {
+                string[] keyParts = key.Replace(LockPrefix, "").Split(":");
+                LockObject lockObject = await GetLock(keyParts[0], keyParts[1]);
+                if (lockObject != null) lockObjects.Add(lockObject);
+            }
+
+            return lockObjects;
         }
 
 
@@ -275,8 +296,6 @@ namespace SlugEnt.Locker
         public async Task<bool> DeleteLock(string lockCategory, string lockID) { return await _redisDB.RemoveAsync(BuildLockKey(lockCategory, lockID)); }
 
 
-
-
         /// <summary>
         ///     Returns the number of Locks there are for the given lockCategory
         /// </summary>
@@ -289,7 +308,6 @@ namespace SlugEnt.Locker
         }
 
 
-
         /// <summary>
         ///     Removes all locks for the specified lockCategory
         /// </summary>
@@ -299,7 +317,6 @@ namespace SlugEnt.Locker
         {
             IEnumerable<string> keys = await _redisDB.SearchKeysAsync(BuildLockPrefix(lockCategory) + "*");
             await _redisDB.RemoveAllAsync(keys);
-
         }
 
 
@@ -321,7 +338,6 @@ namespace SlugEnt.Locker
         }
 
 
-
         /// <summary>
         ///     Updates the lock expiration time to the new value.  It does not add the new time to existing, but sets it to expire in the given seconds.
         /// </summary>
@@ -331,8 +347,7 @@ namespace SlugEnt.Locker
         /// <returns></returns>
         public async Task<bool> UpdateLockExpirationTime(string lockCategory, string lockID, int lockDuration)
         {
-            return await _redisDB.UpdateExpiryAsync(
-                BuildLockKey(lockCategory, lockID), new TimeSpan(0, 0, 0, 0, lockDuration));
+            return await _redisDB.UpdateExpiryAsync(BuildLockKey(lockCategory, lockID), new TimeSpan(0, 0, 0, 0, lockDuration));
         }
 
 
