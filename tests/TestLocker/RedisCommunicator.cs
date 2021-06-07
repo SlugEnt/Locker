@@ -28,7 +28,7 @@ namespace SlugEnt.TestLocker
             {
                 Hosts = new[]
                 {
-                    new RedisHost { Host = "192.168.1.71", Port = 6379 }
+                    new RedisHost { Host = "192.168.100.21", Port = 6379 }
                 },
                 Password = "redis2020",
                 ConnectTimeout = 1000,
