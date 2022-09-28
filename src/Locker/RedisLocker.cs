@@ -45,7 +45,7 @@ namespace SlugEnt.Locker
         /// entire Database than to work thru all the lock types.</param>
         /// <param name="isDedicatedLockDatabase">Set to True, if the database to be used for storing locks is dedicated to this use only or if it
         /// is shared with other uses (caching values, etc).  There is a slight performance boost if using dedicated. </param>
-        public RedisLocker(IRedisCacheClient redisCacheClient, byte redisDatabaseNumber = 0, bool isDedicatedLockDatabase = false)
+        public RedisLocker(IRedisClient redisCacheClient, byte redisDatabaseNumber = 0, bool isDedicatedLockDatabase = false)
         {
             _redisDB = redisCacheClient.GetDb(redisDatabaseNumber);
             _isDedicatedLockDatabase = isDedicatedLockDatabase;
@@ -330,7 +330,7 @@ namespace SlugEnt.Locker
         /// <returns></returns>
         public async Task DeleteAllLocksForlockCategory(string lockCategory)
         {
-            IEnumerable<string> keys = await _redisDB.SearchKeysAsync(BuildLockPrefix(lockCategory) + "*");
+            string[] keys = (await _redisDB.SearchKeysAsync(BuildLockPrefix(lockCategory) + "*")).ToArray();
             await _redisDB.RemoveAllAsync(keys);
         }
 
@@ -346,7 +346,7 @@ namespace SlugEnt.Locker
             else
             {
                 // Need to do a key search - getting all the keys that start with our lock prefix
-                IEnumerable<string> keys = await _redisDB.SearchKeysAsync(LockPrefix + "*");
+                string[] keys = (await _redisDB.SearchKeysAsync(LockPrefix + "*")).ToArray();
                 await _redisDB.RemoveAllAsync(keys);
             }
             return true;
@@ -397,7 +397,7 @@ namespace SlugEnt.Locker
         /// <param name="id">The ID value of the lock object</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal string BuildLockKey(string lockCategory, string id) { return (BuildLockPrefix(lockCategory) + id); }
+        internal string BuildLockKey(string lockCategory, string id) { return BuildLockPrefix(lockCategory) + id; }
 
 
         /// <summary>

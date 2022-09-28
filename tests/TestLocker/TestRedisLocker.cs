@@ -15,7 +15,7 @@
 
 using NUnit.Framework;
 using SlugEnt.Locker;
-using StackExchange.Redis.Extensions.Core.Abstractions;
+using StackExchange.Redis.Extensions.Core.Implementations;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +25,7 @@ namespace SlugEnt.TestLocker
     [Parallelizable(ParallelScope.All)]
     public class Tests
     {
-        private RedisCacheClient _redisCacheClient;
+        private RedisClient _redisClient;
         private RedisLocker _locker;
         private Random _idGenerator;
         private UniqueKeys _uniqueKeys;
@@ -38,10 +38,10 @@ namespace SlugEnt.TestLocker
             RedisCommunicator redisCommunicator = new();
             redisCommunicator.TalkToRedis();
 
-            _redisCacheClient = redisCommunicator.RedisCacheClient;
+            _redisClient = redisCommunicator.RedisClient;
 
             // Now create a locker
-            _locker = new RedisLocker(_redisCacheClient);
+            _locker = new RedisLocker(_redisClient);
 
             // Setup random number generator
             _idGenerator = new Random();
@@ -50,7 +50,7 @@ namespace SlugEnt.TestLocker
             _uniqueKeys = new UniqueKeys();
 
             // Tell Redis to clear everything out of its system
-            await _redisCacheClient.Db0.FlushDbAsync();
+            await _redisClient.Db0.FlushDbAsync();
         }
 
 
@@ -171,7 +171,7 @@ namespace SlugEnt.TestLocker
         public async Task SetLockFullSuiteTests([Range((int)LockType.ReadOnly, (int)LockType.AppLevel3)] int lockTypeInt)
         {
             // We use our own locker with its own Redis DB for this test so we can adjust TTL's
-            RedisLocker rl = new(_redisCacheClient, 1, true);
+            RedisLocker rl = new(_redisClient, 1, true);
             await rl.FlushAllLocks();
             rl.TTL = 300;
             int ttl2 = 2000;
@@ -496,7 +496,7 @@ namespace SlugEnt.TestLocker
             string lockCategory = _uniqueKeys.GetKey("LTSC");
 
             // Create our own custom Locker for this experiment
-            RedisLocker testLocker = new(_redisCacheClient, 0, false);
+            RedisLocker testLocker = new(_redisClient, 0, false);
             int ttl = 3300;
 
             testLocker.TTL = ttl;
@@ -546,7 +546,7 @@ namespace SlugEnt.TestLocker
         [Test]
         public void BuildLockPrefix(bool isDedicatedLockDB)
         {
-            RedisLocker rl = new(_redisCacheClient, 3, isDedicatedLockDB);
+            RedisLocker rl = new(_redisClient, 3, isDedicatedLockDB);
 
             string lockCategory = "ABC";
             string result = rl.BuildLockPrefix(lockCategory);
@@ -566,7 +566,7 @@ namespace SlugEnt.TestLocker
         [Test]
         public void BuildLockKey(bool isDedicatedLockDB)
         {
-            RedisLocker rl = new(_redisCacheClient, 3, isDedicatedLockDB);
+            RedisLocker rl = new(_redisClient, 3, isDedicatedLockDB);
 
             string lockCategory = "ABC";
             string lockID = "987123654";

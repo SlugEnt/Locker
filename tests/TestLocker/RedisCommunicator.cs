@@ -29,8 +29,8 @@ namespace SlugEnt.TestLocker
     {
         public const int RED_LOCKER = 0;
 
-        private RedisCacheClient _redisCacheClient;
-        private IRedisCacheConnectionPoolManager _connectionPoolManager;
+        private RedisClient _redisClient;
+        private IRedisConnectionPoolManager _connectionPoolManager;
 
 
         public RedisCommunicator() { }
@@ -51,16 +51,16 @@ namespace SlugEnt.TestLocker
                 AllowAdmin = true // Enable admin mode to allow flushing of the database
             };
 
-            _connectionPoolManager = new RedisCacheConnectionPoolManager(redisConfig);
-            _redisCacheClient = new RedisCacheClient(_connectionPoolManager, serializer, redisConfig);
+            _connectionPoolManager = new RedisConnectionPoolManager(redisConfig);
+            _redisClient = new RedisClient(_connectionPoolManager, serializer, redisConfig);
 
             return true;
         }
 
 
         /// <summary>
-        ///     Returns the RedisCacheClient so that it may be accesed and used to talk to Redis.
+        ///     Returns the RedisClient so that it may be accesed and used to talk to Redis.
         /// </summary>
-        public RedisCacheClient RedisCacheClient => _redisCacheClient;
+        public RedisClient RedisClient => _redisClient;
     }
 }

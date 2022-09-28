@@ -13,7 +13,7 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
     <PackageReference Include="SlugEnt.UniqueKeys" Version="1.1.0" />
-    <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="7.0.0" />
+    <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="8.0.5" />
   </ItemGroup>
 
   <ItemGroup>
