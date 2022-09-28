@@ -38,8 +38,8 @@ namespace SlugEnt.TestLocker
 
         public bool TalkToRedis()
         {
-            NewtonsoftSerializer serializer = new NewtonsoftSerializer();
-            RedisConfiguration redisConfig = new RedisConfiguration
+            NewtonsoftSerializer serializer = new();
+            RedisConfiguration redisConfig = new()
             {
                 Hosts = new[]
                 {

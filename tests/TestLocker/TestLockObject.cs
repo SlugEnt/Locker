@@ -31,7 +31,7 @@ namespace SlugEnt.TestLocker
 
             LockType lockType = LockType.Exclusive;
 
-            LockObject lockObject = new LockObject(prefix, lockCategory, lockId, lockType, lockComment);
+            LockObject lockObject = new(prefix, lockCategory, lockId, lockType, lockComment);
             Assert.AreEqual(prefix, lockObject.Prefix);
             Assert.AreEqual(lockCategory, lockObject.Category);
             Assert.AreEqual(lockId, lockObject.ID);
@@ -56,7 +56,7 @@ namespace SlugEnt.TestLocker
             string lockId = "trgortg";
             string lockComment = "Some Internal Text";
 
-            LockObject lockObject = new LockObject(prefix, lockType, lockId, settingAsString, lockComment);
+            LockObject lockObject = new(prefix, lockType, lockId, settingAsString, lockComment);
             Assert.AreEqual(prefix, lockObject.Prefix);
             Assert.AreEqual(lockType, lockObject.Category);
             Assert.AreEqual(lockId, lockObject.ID);

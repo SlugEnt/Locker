@@ -35,7 +35,7 @@ namespace SlugEnt.TestLocker
         public async Task InitialSetup()
         {
             // Connect to Redis
-            RedisCommunicator redisCommunicator = new RedisCommunicator();
+            RedisCommunicator redisCommunicator = new();
             redisCommunicator.TalkToRedis();
 
             _redisCacheClient = redisCommunicator.RedisCacheClient;
@@ -71,7 +71,6 @@ namespace SlugEnt.TestLocker
         }
 
 
-
         [Test]
         public async Task SetLockExclusive()
         {
@@ -87,7 +86,6 @@ namespace SlugEnt.TestLocker
             Assert.AreEqual(LockType.Exclusive, lockObj.Type);
             Assert.AreEqual(comment, lockObj.Comment);
         }
-
 
 
         [Test]
@@ -107,7 +105,6 @@ namespace SlugEnt.TestLocker
         }
 
 
-
         [Test]
         public async Task SetLockAppLevel1()
         {
@@ -125,8 +122,6 @@ namespace SlugEnt.TestLocker
         }
 
 
-
-
         [Test]
         public async Task SetLockAppLevel2()
         {
@@ -142,7 +137,6 @@ namespace SlugEnt.TestLocker
             Assert.AreEqual(LockType.AppLevel2, lockObj.Type);
             Assert.AreEqual(lockComment, lockObj.Comment);
         }
-
 
 
         [Test]
@@ -177,7 +171,7 @@ namespace SlugEnt.TestLocker
         public async Task SetLockFullSuiteTests([Range((int)LockType.ReadOnly, (int)LockType.AppLevel3)] int lockTypeInt)
         {
             // We use our own locker with its own Redis DB for this test so we can adjust TTL's
-            RedisLocker rl = new RedisLocker(_redisCacheClient, 1, true);
+            RedisLocker rl = new(_redisCacheClient, 1, true);
             await rl.FlushAllLocks();
             rl.TTL = 300;
             int ttl2 = 2000;
@@ -204,7 +198,7 @@ namespace SlugEnt.TestLocker
 
             // TestID_3:  Create a standard lock, but with a TimeSpan override
             string testID_3 = _idGenerator.Next(5000, 5999).ToString();
-            TimeSpan t5 = new TimeSpan(0, 0, 0, 2);
+            TimeSpan t5 = new(0, 0, 0, 2);
             Assert.IsTrue(await rl.SetLock(lockCategory, testID_3, lockComment, t5), "A14:  Base SetLock with time override did not work for LockType: {0}", lockType);
             // Make sure it's comment is on it.
             Assert.AreEqual(lockComment, lockObj.Comment, "A15:  Lock Comment is incorrect");
@@ -213,7 +207,7 @@ namespace SlugEnt.TestLocker
             string testID_4 = _idGenerator.Next(2000, 2999).ToString();
             string testID_5 = _idGenerator.Next(3000, 3999).ToString();
             string testID_6 = _idGenerator.Next(6000, 6999).ToString();
-            TimeSpan t6 = new TimeSpan(0, 0, 0, 2);
+            TimeSpan t6 = new(0, 0, 0, 2);
 
 
             // Now set lock using Specific Method
@@ -451,7 +445,6 @@ namespace SlugEnt.TestLocker
 
             // Validate Lock is gone
             Assert.IsFalse(await _locker.Exists(lockCategory, id));
-
         }
 
 
@@ -495,7 +488,6 @@ namespace SlugEnt.TestLocker
         }
 
 
-
         // Validate that the TTL value on the Locker is used for the default lock duration
         [Test]
         public async Task LockTTLSetCorrectly()
@@ -504,7 +496,7 @@ namespace SlugEnt.TestLocker
             string lockCategory = _uniqueKeys.GetKey("LTSC");
 
             // Create our own custom Locker for this experiment
-            RedisLocker testLocker = new RedisLocker(_redisCacheClient, 0, false);
+            RedisLocker testLocker = new(_redisCacheClient, 0, false);
             int ttl = 3300;
 
             testLocker.TTL = ttl;
@@ -554,7 +546,7 @@ namespace SlugEnt.TestLocker
         [Test]
         public void BuildLockPrefix(bool isDedicatedLockDB)
         {
-            RedisLocker rl = new RedisLocker(_redisCacheClient, 3, isDedicatedLockDB);
+            RedisLocker rl = new(_redisCacheClient, 3, isDedicatedLockDB);
 
             string lockCategory = "ABC";
             string result = rl.BuildLockPrefix(lockCategory);
@@ -574,7 +566,7 @@ namespace SlugEnt.TestLocker
         [Test]
         public void BuildLockKey(bool isDedicatedLockDB)
         {
-            RedisLocker rl = new RedisLocker(_redisCacheClient, 3, isDedicatedLockDB);
+            RedisLocker rl = new(_redisCacheClient, 3, isDedicatedLockDB);
 
             string lockCategory = "ABC";
             string lockID = "987123654";
@@ -587,7 +579,6 @@ namespace SlugEnt.TestLocker
                 expected = rl.LockPrefix + lockCategory + ":" + lockID;
 
             Assert.AreEqual(expected, result);
-
         }
 
 
@@ -607,6 +598,7 @@ namespace SlugEnt.TestLocker
             string expected = (LockTypeValues.ValuesAsStrings[(int)lockType] + comment);
             Assert.AreEqual(expected, lockValue);
         }
+
         #endregion
     }
 }
