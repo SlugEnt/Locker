@@ -1,4 +1,19 @@
-﻿using StackExchange.Redis.Extensions.Core.Abstractions;
+﻿/*
+ * MIT License
+ * Copyright (c) 2022 SlugEnt
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+using StackExchange.Redis.Extensions.Core.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +45,7 @@ namespace SlugEnt.Locker
         /// entire Database than to work thru all the lock types.</param>
         /// <param name="isDedicatedLockDatabase">Set to True, if the database to be used for storing locks is dedicated to this use only or if it
         /// is shared with other uses (caching values, etc).  There is a slight performance boost if using dedicated. </param>
-        public RedisLocker(IRedisCacheClient redisCacheClient, byte redisDatabaseNumber = 0, bool isDedicatedLockDatabase = false)
+        public RedisLocker(IRedisClient redisCacheClient, byte redisDatabaseNumber = 0, bool isDedicatedLockDatabase = false)
         {
             _redisDB = redisCacheClient.GetDb(redisDatabaseNumber);
             _isDedicatedLockDatabase = isDedicatedLockDatabase;
@@ -315,7 +330,7 @@ namespace SlugEnt.Locker
         /// <returns></returns>
         public async Task DeleteAllLocksForlockCategory(string lockCategory)
         {
-            IEnumerable<string> keys = await _redisDB.SearchKeysAsync(BuildLockPrefix(lockCategory) + "*");
+            string[] keys = (await _redisDB.SearchKeysAsync(BuildLockPrefix(lockCategory) + "*")).ToArray();
             await _redisDB.RemoveAllAsync(keys);
         }
 
@@ -331,7 +346,7 @@ namespace SlugEnt.Locker
             else
             {
                 // Need to do a key search - getting all the keys that start with our lock prefix
-                IEnumerable<string> keys = await _redisDB.SearchKeysAsync(LockPrefix + "*");
+                string[] keys = (await _redisDB.SearchKeysAsync(LockPrefix + "*")).ToArray();
                 await _redisDB.RemoveAllAsync(keys);
             }
             return true;
@@ -382,7 +397,7 @@ namespace SlugEnt.Locker
         /// <param name="id">The ID value of the lock object</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal string BuildLockKey(string lockCategory, string id) { return (BuildLockPrefix(lockCategory) + id); }
+        internal string BuildLockKey(string lockCategory, string id) { return BuildLockPrefix(lockCategory) + id; }
 
 
         /// <summary>

@@ -1,5 +1,5 @@
 {
-  "ConfigStructureVersion": "0.10.0",
+  "ConfigStructureVersion": "0.33.0",
   "UseCodeCoverage": true,
   "CodeCoverageThreshold": 90,
   "DeployProdRoot": null,
@@ -10,20 +10,20 @@
   "DeployFolderUsesSemVer": true,
   "DeployToAssemblyFolders": false,
   "GitRemote": null,
+  "AngularDeployRootName": null,
   "Projects": [
     {
       "Name": "Locker",
       "Deploy": "Nuget",
       "HasTypeWriterScripts": false,
-      "Framework": "netstandard2.1",
       "IsTestProject": false
     },
     {
       "Name": "TestLocker",
       "Deploy": "None",
       "HasTypeWriterScripts": false,
-      "Framework": "netcoreapp3.1",
       "IsTestProject": false
     }
-  ]
+  ],
+  "AngularProjects": []
 }
